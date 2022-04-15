@@ -1,0 +1,1 @@
+This is code is aimed at solving the problem of pattern sequencing for the minimization of open stacks in a industrial cutting.

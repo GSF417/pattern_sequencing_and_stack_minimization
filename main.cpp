@@ -8,6 +8,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+    // start counting program run time
     time_t start_time;
     time(&start_time);
     // INPUT
@@ -38,9 +39,12 @@ int main(int argc, char *argv[]) {
 
     // GRAPH VERIFICATION
     // if trees exist within the graph, process them first
-
+    patterns_graph.print_active_nodes();
+    patterns_graph.check_for_trees();
+    patterns_graph.print_active_nodes();
     // COLLAPSE VERTICES
 
+    // finish counting program run time
     time_t end_time;
     time(&end_time);
     cout << end_time - start_time << " seconds of execution";

@@ -30,7 +30,8 @@ class Graph {
             // stores the final node of this partial walk
             int ending_node;
             // stores the pwd degree of this partial walk
-            int pwd_degree;
+            int pw_degree;
+            int fpw_degree;
         } typedef stPartialWalk;
 
         // this integer stores the amount of nodes created
@@ -122,7 +123,8 @@ class Graph {
             }
             return final;
         }
-
+        
+        // this function shall store away all trees that can be found in our graph for later use, making the graph easier to solve
         void TREE3() {
             std::vector<int> L;
             std::vector<int> scores;
@@ -130,8 +132,8 @@ class Graph {
             std::vector<int> transversed_arcs;
             std::vector<stPartialWalk> partial_walks;
             int current_walk = 0;
+            // step 0
             // initially, we create a list L that stores each node of degree 1
-            L.clear();
             for (int i = 0; i < existing_nodes.size(); i++) {
                 if (node_degree(i) <= 1) {
                    L.push_back(i);
@@ -142,18 +144,22 @@ class Graph {
             }
             // here we initialize our transversed arcs by defining them as 1, which means we can still pass through them
             // later we define 0 as indicating we already went through this arc
-            transversed_arcs.clear();
             for (int i = 0; i < existing_arcs.size(); i++) {
                 transversed_arcs.push_back(1);
             }
+            // step 1
             // now to calculate and store each partial walk
             for (int i = 0; i < L.size(); i++) {
+                // store the current node of degree 1 we are verifying
                 int node = L[i];
+                // initialize this partial walk in the vector
                 int next_arc = 0;
                 std::vector<int> arcs;
                 partial_walks.push_back(stPartialWalk{arcs, next_arc, 0, 1});
                 int adj_node = node;
+                // while our current node hade degree of 2 or less or negative score, execute the loop
                 while (node_degree(adj_node) <= 2 || scores[adj_node] < 0) {
+                    // check the value in the node itself
                     stNode *node_next = &existing_nodes[adj_node];
                     for(int j = 0; j < node_next->connected_arcs.size(); j++) {
                         int comp_arc = node_next->connected_arcs[j];
@@ -176,33 +182,56 @@ class Graph {
                     else {
                         adj_node = existing_arcs[next_arc].node_2;
                     }
-                    partial_walks[current_walk].pwd_degree = 2;
+                    partial_walks[current_walk].pw_degree = 2;
                 }
                 partial_walks[current_walk].ending_node = adj_node;
                 partial_walks[current_walk].next_arc = next_arc;
+                partial_walks[current_walk].fpw_degree = node_degree(partial_walks[current_walk].ending_node);
             }
-            for (int i = 0; i < partial_walks.size(); i++) {
-                stPartialWalk curr_walk = partial_walks[i];
-                for (int j = 0; j < curr_walk.arcs.size(); j++) {
-                    int curr_arc = curr_walk.arcs[j];
-                    disable_node(existing_arcs[curr_arc].node_1);
-                    disable_node(existing_arcs[curr_arc].node_2);
+            // this loop shall be broken once we a find a break instruction that determines we are already finished
+            while (1) {
+                // step 2
+                // now, we erase each visited node 
+                for (int i = 0; i < partial_walks.size(); i++) {
+                    stPartialWalk curr_walk = partial_walks[i];
+                    for (int j = 0; j < curr_walk.arcs.size(); j++) {
+                        int curr_arc = curr_walk.arcs[j];
+                        disable_node(existing_arcs[curr_arc].node_1);
+                        disable_node(existing_arcs[curr_arc].node_2);
+                    }
+                    if (scores[curr_walk.ending_node] == -1) {
+                        scores[curr_walk.ending_node] = curr_walk.pw_degree;
+                    }
+                    else if (curr_walk.pw_degree > scores[curr_walk.ending_node]) {
+                        scores[curr_walk.ending_node] = curr_walk.pw_degree;
+                        scores_flag[curr_walk.ending_node] = 1;
+                    }
+                    else {
+                        scores_flag[curr_walk.ending_node] = 1;
+                    }
                 }
-                if (scores[curr_walk.ending_node] == -1) {
-                    scores[curr_walk.ending_node] = curr_walk.pwd_degree;
+                for (int i = 0; i < scores.size(); i++) {
+                    if (scores_flag[i] == 1) {
+                        scores[i]++;
+                    }
                 }
-                else if (curr_walk.pwd_degree > scores[curr_walk.ending_node]) {
-                    scores[curr_walk.ending_node] = curr_walk.pwd_degree;
-                    scores_flag[curr_walk.ending_node] = 1;
+                // once more, we create a list with all nodes of degree 1
+                L.clear();
+                for (int i = 0; i < existing_nodes.size(); i++) {
+                    if (node_degree(i) <= 1) {
+                    L.push_back(i);
+                    }
+                    // we also define each node in the graph as having a score of -1
+                    scores.push_back(-1);
+                    scores_flag.push_back(0);
                 }
-                else {
-                    scores_flag[curr_walk.ending_node] = 1;
+                // here we initialize our transversed arcs by defining them as 1, which means we can still pass through them
+                // later we define 0 as indicating we already went through this arc
+                transversed_arcs.clear();
+                for (int i = 0; i < existing_arcs.size(); i++) {
+                    transversed_arcs.push_back(1);
                 }
-            }
-            for (int i = 0; i < scores.size(); i++) {
-                if (scores_flag[i] == 1) {
-                    scores[i]++;
-                }
+                // step 3
             }
         }
 

@@ -40,8 +40,7 @@ int main(int argc, char *argv[]) {
     // GRAPH VERIFICATION
     // if trees exist within the graph, process them first
     patterns_graph.print_active_nodes();
-    patterns_graph.check_for_trees();
-    patterns_graph.print_active_nodes();
+    patterns_graph.TREE3();
     // COLLAPSE VERTICES
 
     // finish counting program run time

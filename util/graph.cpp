@@ -105,6 +105,50 @@ class Graph {
             }
         }
 
+        // verifies whether an arc that connects the nodes x and y already exists or not
+        bool arc_exists(int x, int y) {
+            for (int i = 0; i < existing_arcs.size(); i++) {
+                // this is the current arc we shall be comparing to
+                stArc *comp = &existing_arcs[i];
+                if ((comp->node_1 == x || comp->node_2 == x) && (comp->node_1 == y || comp->node_2 == y)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // walks through our existing arc vector and prints in the screen the existing arcs
+        void print_arcs() {
+            for (int i = 0; i < existing_arcs.size(); i++) {
+                cout << existing_arcs[i].node_1 << " " << existing_arcs[i].node_2 << endl;
+            }
+        }
+
+        // initializes a new arc and adds it to each of its corresponding nodes
+        void add_arc_to_nodes(int n_1, int n_2) {
+            Graph::stArc new_arc = {true, n_1, n_2};
+            existing_nodes[n_1].connected_arcs.push_back(arc_count);
+            existing_nodes[n_2].connected_arcs.push_back(arc_count);
+            arc_count++;
+            existing_arcs.push_back(new_arc);
+        }
+
+        void print_active_nodes() {
+            cout << "Active Nodes" << endl;
+            for (int i = 0; i < existing_nodes.size(); i++) {
+                stNode *node = &existing_nodes[i];
+                if (node->active) {
+                    cout << "Node[" << i << "]" << endl << "Arcs: ";
+                    for (int j = 0; j < node->connected_arcs.size(); j++) {
+                        if (existing_arcs[node->connected_arcs[j]].active) {
+                            cout << node->connected_arcs[j] << " ";
+                        }
+                    }
+                    cout << endl;
+                }
+            }
+        }
+
         int partial_walk(int id, int final) {
             stNode *node = &existing_nodes[id];
             if (node_degree(id) > 2) {
@@ -122,6 +166,104 @@ class Graph {
                 partial_walk(adjNode, final);
             }
             return final;
+        }
+
+        // this function shall receive a list of partial walks from TREE3, find all that have an ending k and then join them into a new partial walk
+        stPartialWalk CONSTRUCT(std::vector<stPartialWalk> pws, int k) {
+            // execute CONSTRUCT algorythm
+            int highest = -1;
+            int second_highest = -1;
+            vector<int> arcs;
+            stPartialWalk result = {arcs, -1, k, node_degree(k), -1};
+            // here we search for the highest and second highest pw degrees that connect to our singular node
+            for (int i = 0 ; i < pws.size(); i++) {
+                stPartialWalk pw = pws[i];
+                if (pw.ending_node == k ||
+                    existing_arcs[pw.next_arc].node_1 == k ||
+                    existing_arcs[pw.next_arc].node_2 == k) {
+                        if (highest == -1) {
+                            highest = i;
+                        }
+                        if (pw.pw_degree > pws[highest].pw_degree) {
+                            second_highest = highest;
+                            highest = i;
+                        }
+                        else if (pw.pw_degree > pws[second_highest].pw_degree) {
+                            second_highest = i;
+                        }
+                }
+            }
+            // now we create a new partial walk that contains all partial walks that have the node as the ending one
+            // we start by adding to the resulting partial walk the highest linked partial walk
+            for (int i = 0; i < pws[highest].arcs.size(); i++) {
+                result.arcs.push_back(pws[highest].arcs[i]);
+            }
+            // along with its extended arc
+            result.arcs.push_back(pws[highest].next_arc);
+            // in between the highest and second highest, we add every other partial walk
+            for (int i = 0; i < pws.size(); i++) {
+                if (i == highest || i == second_highest) {
+                    continue;
+                }
+                for (int j = 0; j < pws[i].arcs.size(); j++) {
+                    result.arcs.push_back(pws[i].arcs[j]);
+                }
+            }
+            // we finish by adding to the resulting partial the second highest linked partial walk, but in reverse
+            // with its extended arc first
+            result.arcs.push_back(pws[second_highest].next_arc);
+            for (int i = pws[second_highest].arcs.size() - 1; i >= 0; i--) {
+                result.arcs.push_back(pws[second_highest].arcs[i]);
+            }
+            return result;
+        }
+
+        stPartialWalk CONSTRUCT1(std::vector<stPartialWalk> pws, int k) {
+            // execute CONSTRUCT1 algorythm
+            int highest = -1;
+            int second_highest = -1;
+            vector<int> arcs;
+            stPartialWalk result = {arcs, -1, k, node_degree(k), -1};
+            // here we search for the highest and second highest pw degrees that connect to our singular node
+            for (int i = 0 ; i < pws.size(); i++) {
+                stPartialWalk pw = pws[i];
+                if (pw.ending_node == k ||
+                    existing_arcs[pw.next_arc].node_1 == k ||
+                    existing_arcs[pw.next_arc].node_2 == k) {
+                        if (highest == -1) {
+                            highest = i;
+                        }
+                        if (pw.pw_degree > pws[highest].pw_degree) {
+                            second_highest = highest;
+                            highest = i;
+                        }
+                        else if (pw.pw_degree > pws[second_highest].pw_degree) {
+                            second_highest = i;
+                        }
+                }
+            }
+            // now we create a new partial walk that contains all partial walks that have the node as the ending one
+            // we start by adding to the resulting partial walk the highest linked partial walk
+            for (int i = 0; i < pws[highest].arcs.size(); i++) {
+                result.arcs.push_back(pws[highest].arcs[i]);
+            }
+            // along with its extended arc
+            result.arcs.push_back(pws[highest].next_arc);
+            // in between the highest and second highest, we add every other partial walk
+            for (int i = 0; i < pws.size(); i++) {
+                if (i == highest || i == second_highest) {
+                    continue;
+                }
+                for (int j = 0; j < pws[i].arcs.size(); j++) {
+                    result.arcs.push_back(pws[i].arcs[j]);
+                }
+            }
+            // we finish by adding to the resulting partial the second highest linked partial walk, but in reverse
+            // with its extended arc first
+            for (int i = 0; i < pws[second_highest].arcs.size(); i++) {
+                result.arcs.push_back(pws[second_highest].arcs[i]);
+            }
+            return result;
         }
         
         // this function shall store away all trees that can be found in our graph for later use, making the graph easier to solve
@@ -189,6 +331,7 @@ class Graph {
                 partial_walks[current_walk].fpw_degree = node_degree(partial_walks[current_walk].ending_node);
             }
             // this loop shall be broken once we a find a break instruction that determines we are already finished
+            vector<stPartialWalk> resulting_walks;
             while (1) {
                 // step 2
                 // now, we erase each visited node 
@@ -219,7 +362,7 @@ class Graph {
                 L.clear();
                 for (int i = 0; i < existing_nodes.size(); i++) {
                     if (node_degree(i) <= 1) {
-                    L.push_back(i);
+                        L.push_back(i);
                     }
                     // we also define each node in the graph as having a score of -1
                     scores.push_back(-1);
@@ -232,51 +375,17 @@ class Graph {
                     transversed_arcs.push_back(1);
                 }
                 // step 3
-            }
-        }
-
-        // verifies whether an arc that connects the nodes x and y already exists or not
-        bool arc_exists(int x, int y) {
-            for (int i = 0; i < existing_arcs.size(); i++) {
-                // this is the current arc we shall be comparing to
-                stArc *comp = &existing_arcs[i];
-                if ((comp->node_1 == x || comp->node_2 == x) && (comp->node_1 == y || comp->node_2 == y)) {
-                    return true;
+                if (L.size() <= 1) {
+                    resulting_walks.push_back(CONSTRUCT(partial_walks, L[0]));
+                    break;
                 }
             }
-            return false;
         }
 
-        // walks through our existing arc vector and prints in the screen the existing arcs
-        void print_arcs() {
-            for (int i = 0; i < existing_arcs.size(); i++) {
-                cout << existing_arcs[i].node_1 << " " << existing_arcs[i].node_2 << endl;
-            }
-        }
-
-        // initializes a new arc and adds it to each of its corresponding nodes
-        void add_arc_to_nodes(int n_1, int n_2) {
-            Graph::stArc new_arc = {true, n_1, n_2};
-            existing_nodes[n_1].connected_arcs.push_back(arc_count);
-            existing_nodes[n_2].connected_arcs.push_back(arc_count);
-            arc_count++;
-            existing_arcs.push_back(new_arc);
-        }
-
-        void print_active_nodes() {
-            cout << "Active Nodes" << endl;
-            for (int i = 0; i < existing_nodes.size(); i++) {
-                stNode *node = &existing_nodes[i];
-                if (node->active) {
-                    cout << "Node[" << i << "]" << endl << "Arcs: ";
-                    for (int j = 0; j < node->connected_arcs.size(); j++) {
-                        if (existing_arcs[node->connected_arcs[j]].active) {
-                            cout << node->connected_arcs[j] << " ";
-                        }
-                    }
-                    cout << endl;
-                }
-            }
+        // arcs collapse
+        int find_lower_bound() {
+            Graph graph = *this;
+            
         }
 
         // constructs a new graph that is initially empty

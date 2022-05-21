@@ -34,13 +34,18 @@ int main(int argc, char *argv[]) {
     }
     */
     // GRAPH GENERATION
-    Graph patterns_graph = Graph(patterns);
-    //patterns_graph.print_arcs();
+    Graph graph_zero = Graph(patterns);
+    Graph graph_p = graph_zero;
+    Graph graph_c;
+    //graph_zero.print_arcs();
 
     // GRAPH VERIFICATION
     // if trees exist within the graph, process them first
-    patterns_graph.print_active_nodes();
-    patterns_graph.TREE3();
+    graph_p.TREE3();
+    graph_zero.print_active_nodes();
+    graph_p.print_active_nodes();
+    graph_c = graph_p;
+    int lower_bound = graph_c.find_lower_bound();
     // COLLAPSE VERTICES
 
     // finish counting program run time

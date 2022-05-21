@@ -2,6 +2,7 @@
 using namespace std;
 
 class Graph {
+    /*
     private:
         struct arc {
             // this boolean determines whether this arc has been erased or not
@@ -547,6 +548,76 @@ class Graph {
                             }
                             if (!arc_exists(j, asoc[k])) {
                                 add_arc_to_nodes(j, asoc[k]);
+                            }
+                        }
+                    }
+                }
+                asoc.clear();
+            }
+        }
+    */
+    private:
+
+    public:
+        int **vert_matrix;
+        int matrix_size = 0;
+
+        void add_arc(int v1, int v2) {
+            vert_matrix[v1][v2] = 1;
+            vert_matrix[v2][v1] = 1;
+        }
+
+        int arc_exists(int v1, int v2) {
+            if (vert_matrix[v1][v2] == 1) {
+                return 1;
+            }
+            return 0;
+        }
+        void TREE3() {
+
+        }
+
+        void print() {
+            for (int i = 0; i < matrix_size; i++) {
+                for (int j = 0; j < matrix_size; j++) {
+                    cout << vert_matrix[i][j] << " ";
+                }
+                cout << endl;
+            }
+        }
+
+        int find_lower_bound() {
+            return 0;
+        }
+
+        Graph() { }
+
+        Graph(std::vector<std::vector<int>> patterns) {
+            // first we allocate a new matrix based on the size of the array we are getting
+            matrix_size = patterns[0].size();
+            vert_matrix = new int*[matrix_size];
+            for (int i = 0; i < matrix_size; i++) {
+                vert_matrix[i] = new int[matrix_size];
+            }
+            // initialize the matrix with zeroes in all its spaces
+            for (int i = 0; i < matrix_size; i++) {
+                for (int j = 0; j < matrix_size; j++) {
+                    vert_matrix[i][j] = 0;
+                }
+            }
+            // now we create arcs based on what patterns have shared parts
+            std::vector<int> asoc;
+            for (int i = 0; i < patterns.size(); i++) {
+                for (int j = 0; j < patterns[i].size(); j++) {
+                    if (patterns[i][j] == 1) {
+                        asoc.push_back(j);
+                        for (int k = 0; k < asoc.size(); k++) {
+                            if (j == asoc[k]) {
+                                continue;
+                            }
+                            if (!arc_exists(j, asoc[k])) {
+                                add_arc(j, asoc[k]);
+                                cout << "Connect " << j << " and " << asoc[k] << endl;
                             }
                         }
                     }

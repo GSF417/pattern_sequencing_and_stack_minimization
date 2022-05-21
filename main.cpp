@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
     // GRAPH VERIFICATION
     // if trees exist within the graph, process them first
     graph_p.TREE3();
-    graph_zero.print_active_nodes();
-    graph_p.print_active_nodes();
+    graph_zero.print();
+    //graph_p.print();
     graph_c = graph_p;
     int lower_bound = graph_c.find_lower_bound();
     // COLLAPSE VERTICES

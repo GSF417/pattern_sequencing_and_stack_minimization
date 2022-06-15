@@ -394,6 +394,7 @@ class Graph {
                 // step 3
                 if (L.size() <= 1) {
                     resulting_walks.push_back(CONSTRUCT(partial_walks, L[0]));
+                    break;
                 }
                 else {
                     int lowest_score_node = 0;
@@ -429,6 +430,7 @@ class Graph {
                         disable_tree_node(existing_arcs[i].node_2);
                     }
                 }
+                partial_walks.clear();
             }
         }
 
@@ -506,14 +508,59 @@ class Graph {
             }
             stNode new_node = {created_arcs, true, -1};
             existing_nodes.push_back(new_node);
+            disable_node(v1);
+            disable_node(v2);
         }
 
         // to find the lower bound of the graph, we shall recursively execute arc collapsing until it is simple enough to state its lower bound.
         int find_lower_bound() {
             int lower_bound = 0;
+            int lowest_degree = -1;
+            int chosen_0 = -1, chosen_1 = -1;
+            vector<int> lowest_degree_nodes;
             // we shall execute until every node in the graph is connected with the other nodes that exist in the graph
-            while (!graph_is_complete) {
-                // initially we just collapse arcs by merging two adjacent nodes together
+            // initially we just collapse arcs by merging two adjacent nodes together
+            while (!graph_is_complete()) {
+                // first we discover what is the lowest degree in the graph
+                for (int i = 0; i < (int) existing_nodes.size(); i++) {
+                    if (!existing_nodes[i].active) {
+                        continue;
+                    }
+                    int curr_degree = node_degree(i);
+                    if (lowest_degree == -1) {
+                        lowest_degree = curr_degree;
+                    }
+                    else if (curr_degree < lowest_degree) {
+                        lowest_degree = curr_degree;
+                    }
+                }
+                // now we create a list with all nodes of lowest degree
+                for (int i = 0; i < (int) existing_nodes.size(); i++) {
+                    if (!existing_nodes[i].active) {
+                        continue;
+                    }
+                    int degree = node_degree(i);
+                    if (degree == lowest_degree) {
+                        lowest_degree_nodes.push_back(i);
+                    }
+                }
+                int lowest_score = -1;
+                // Now we scan the list we have created for nodes that are mutually adjacent. If they exist, pick them.
+                for (int i = 0; i < (int) lowest_degree_nodes.size(); i++) {
+                    if (i == 0) continue;
+                    for (int j = 0; j < i; j++) {
+                        
+                    }
+                }
+                // Now scan all nodes of lowest degree and find the one with lowest score
+                for (int i = 0; i < (int) lowest_degree_nodes.size(); i++) {
+                    if (lowest_score == -1) {
+                        lowest_score = existing_nodes[lowest_degree_nodes[i]].score;
+                    }
+                    else if (lowest_score > existing_nodes[lowest_degree_nodes[i]].score) {
+                        lowest_score = existing_nodes[lowest_degree_nodes[i]].score;
+                    }
+                }
             }
             return lower_bound;
         }
@@ -554,4 +601,5 @@ class Graph {
                 asoc.clear();
             }
         }
+ 
 };
